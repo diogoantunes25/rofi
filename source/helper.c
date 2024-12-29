@@ -1006,6 +1006,9 @@ gboolean helper_execute(const char *wd, char **args, const char *error_precmd,
   GSpawnChildSetupFunc child_setup = NULL;
   gpointer user_data = NULL;
 
+  // TODO: (dsa) insert hook here
+  g_debug("[dsa] Running %s with args[0] = %s\n", wd, args[0]);
+
   display_startup_notification(context, &child_setup, &user_data);
 
   g_spawn_async(wd, args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,

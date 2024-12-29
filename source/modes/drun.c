@@ -28,6 +28,9 @@
 /** The log domain of this dialog. */
 #define G_LOG_DOMAIN "Modes.DRun"
 
+// FIXME: remove
+#define ENABLE_DRUN
+
 #include "config.h"
 #ifdef ENABLE_DRUN
 #include <limits.h>
@@ -384,6 +387,8 @@ static void exec_cmd_entry(DRunModeEntry *e, const char *path) {
     exec_path = NULL;
   }
 
+  g_debug("[dsa] Exec path is |%s|", exec_path);
+
   RofiHelperExecuteContext context = {
       .name = e->name,
       .icon = e->icon_name,
@@ -397,6 +402,8 @@ static void exec_cmd_entry(DRunModeEntry *e, const char *path) {
     context.wmclass = wmclass =
         g_key_file_get_string(e->key_file, e->action, "StartupWMClass", NULL);
   }
+
+  g_debug("[dsa] About to run helper_execute_command");
 
   // Returns false if not found, if key not found, we don't want run in
   // terminal.
