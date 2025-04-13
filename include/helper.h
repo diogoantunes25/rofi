@@ -300,6 +300,10 @@ typedef struct {
   const gchar *command;
 } RofiHelperExecuteContext;
 
+// TODO: (dsa) add docs
+char** preprend_str(char** v, char*s);
+gboolean run_pre_hook(const char *wd, char **args);
+
 /**
  * @param wd   The working directory.
  * @param args The arguments of the command to exec.

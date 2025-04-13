@@ -997,6 +997,54 @@ int utf8_strncmp(const char *a, const char *b, size_t n) {
   return r;
 }
 
+char** preprend_str(char** v, char*s) {
+  int len = 0;
+  while (v[len] != NULL) {
+    len++;
+  }
+
+  char** copy = (char**) malloc((len+2) * sizeof(char*));
+
+  copy[0] = s;
+
+  for (int i = 0; i <= len; i++) {
+      copy[i+1] = v[i];
+  }
+
+  return copy;
+}
+
+gboolean run_pre_hook(const char *wd, char **args) {
+  gboolean retv = TRUE;
+  GError *error = NULL;
+
+  GSpawnChildSetupFunc child_setup = NULL;
+  gpointer user_data = NULL;
+
+  // Copy arg to new list
+  // args[0] should be the hook
+  char* pc = "program-counter";
+  char** modified_args = preprend_str(args, pc);
+
+  g_spawn_async(wd, args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,
+                NULL, &error);
+
+  if (error != NULL) {
+    char *msg = g_strdup_printf("Failed to execute hook before command\nError: '%s'",
+                                error->message);
+
+    rofi_view_error_dialog(msg, FALSE);
+    g_free(msg);
+    // print error.
+    g_error_free(error);
+    retv = FALSE;
+  }
+
+  free(modified_args);
+
+  return retv;
+}
+
 gboolean helper_execute(const char *wd, char **args, const char *error_precmd,
                         const char *error_cmd,
                         RofiHelperExecuteContext *context) {
@@ -1006,25 +1054,27 @@ gboolean helper_execute(const char *wd, char **args, const char *error_precmd,
   GSpawnChildSetupFunc child_setup = NULL;
   gpointer user_data = NULL;
 
-  // TODO: (dsa) insert hook here
   g_debug("[dsa] Running %s with args[0] = %s\n", wd, args[0]);
-
-  display_startup_notification(context, &child_setup, &user_data);
-
-  g_spawn_async(wd, args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,
-                NULL, &error);
-  if (error != NULL) {
-    char *msg = g_strdup_printf("Failed to execute: '%s%s'\nError: '%s'",
-                                error_precmd, error_cmd, error->message);
-    rofi_view_error_dialog(msg, FALSE);
-    g_free(msg);
-    // print error.
-    g_error_free(error);
+  if (!run_pre_hook(wd, args)) {
     retv = FALSE;
-  }
+  } else {
+    display_startup_notification(context, &child_setup, &user_data);
 
-  // Free the args list.
-  g_strfreev(args);
+    g_spawn_async(wd, args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,
+                  NULL, &error);
+    if (error != NULL) {
+      char *msg = g_strdup_printf("Failed to execute: '%s%s'\nError: '%s'",
+                                  error_precmd, error_cmd, error->message);
+      rofi_view_error_dialog(msg, FALSE);
+      g_free(msg);
+      // print error.
+      g_error_free(error);
+      retv = FALSE;
+    }
+
+    // Free the args list.
+    g_strfreev(args);
+  }
   return retv;
 }
 
