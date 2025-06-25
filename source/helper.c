@@ -1021,12 +1021,15 @@ gboolean run_pre_hook(const char *wd, char **args) {
   GSpawnChildSetupFunc child_setup = NULL;
   gpointer user_data = NULL;
 
-  // Copy arg to new list
-  // args[0] should be the hook
-  char* pc = "program-counter";
-  char** modified_args = preprend_str(args, pc);
+  // Create program-counter command: program-counter register <app_name>
+  char* pc_path = "/home/dsa/work/small-projects/personal-websites/live/dashboard/program-counter/target/release/program-counter";
+  char** pc_args = (char**) malloc(4 * sizeof(char*));
+  pc_args[0] = pc_path;
+  pc_args[1] = "register";
+  pc_args[2] = args[0];  // The application being launched
+  pc_args[3] = NULL;
 
-  g_spawn_async(wd, args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,
+  g_spawn_async(wd, pc_args, NULL, G_SPAWN_SEARCH_PATH, child_setup, user_data,
                 NULL, &error);
 
   if (error != NULL) {
@@ -1040,7 +1043,7 @@ gboolean run_pre_hook(const char *wd, char **args) {
     retv = FALSE;
   }
 
-  free(modified_args);
+  free(pc_args);
 
   return retv;
 }
