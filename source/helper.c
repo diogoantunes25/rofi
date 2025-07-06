@@ -1022,10 +1022,10 @@ gboolean run_pre_hook(const char *wd, char **args) {
   gpointer user_data = NULL;
 
   // Create program-counter command: program-counter register <app_name>
-  char* pc_path = "/home/dsa/work/small-projects/personal-websites/live/dashboard/program-counter/target/release/program-counter";
+  char* pc_path = "/home/dsa/work/small-projects/personal-websites/live/dashboard-refactor/cli/target/debug/phdw";
   char** pc_args = (char**) malloc(4 * sizeof(char*));
   pc_args[0] = pc_path;
-  pc_args[1] = "register";
+  pc_args[1] = "distraction";
   pc_args[2] = args[0];  // The application being launched
   pc_args[3] = NULL;
 
